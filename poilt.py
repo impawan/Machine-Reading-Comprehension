@@ -18,6 +18,7 @@ ps = PorterStemmer()
 w_tokenizer = nltk.tokenize.WhitespaceTokenizer()
 lemmatizer = nltk.stem.WordNetLemmatizer()
 
+from scipy import spatial
 
 
 from math import*
@@ -27,13 +28,20 @@ def square_rooted(x):
     return round(sqrt(sum([a*a for a in x])),3)
  
 def cosine_similarity(x,y):
- 
+   x = x[0]
+   y = y[0]
+   
    numerator = sum(a*b for a,b in zip(x,y))
    denominator = square_rooted(x)*square_rooted(y)
-   return round(numerator/float(denominator),3)
- 
+
+   ret =  round(numerator/float(denominator),3)
+   return ret
 
 
+
+def cosine_similarity1(list1,list2):
+    result = 1 - spatial.distance.cosine(list1[0], list2[0])
+    return result
 
 
 
@@ -105,14 +113,20 @@ def clean_text(text):
 file = open('sample.txt','r',encoding="utf8")
 file = file.read()
 file = file.lower()
-file = lemmatize_text(file)
-file = text_stemming(file)
+#file = lemmatize_text(file)
+#file = text_stemming(file)
+
+file = file.strip()
+
 sentences = file.split('.') 
+sentences.pop()
+file = clean_text(file)
+
 
 for index, sentence in enumerate(sentences):
     sentence = clean_text(sentence)
     sentences[index]  = sentence
-file = clean_text(file)
+
 stop_words = nltk.corpus.stopwords.words('english')
 
 
@@ -135,13 +149,14 @@ ques =  ques_feature(ques,feature_set)
 df_ques = pd.DataFrame([ques])
 
 temp = []
-for row in df_passage:  
+for row in range(df_passage.shape[0]):  
    # res = cosine_similarity(df_ques,df_passage[row])
-    X= [list(df_ques)]
-    print(type(X))
+    print(row)
+    X= [list(df_ques.iloc[0,:])]
+    #print(type(X))
    # X = np.shape(X)
     Y = [list(df_passage.iloc[row,:])]
-    print(type(Y))
+    #print(type(Y))
    
     #res = np.dot(X,Y)
     res = cosine_similarity(X,Y)
